@@ -130,7 +130,7 @@ fn stage_1(input: &mut [u64; KECCAK_WORDS], scratch_pad: &mut [u64; MEMORY_SIZE]
 
 // This function is used to hash the input using the generated scratch pad
 // NOTE: The scratchpad is completely overwritten in stage 1  and can be reused without any issues
-pub fn xelis_hash(input: &mut [u8; BYTES_ARRAY_INPUT], scratch_pad: &mut ScratchPad) -> Result<Hash, Error> {
+pub fn naya_hash(input: &mut [u8; BYTES_ARRAY_INPUT], scratch_pad: &mut ScratchPad) -> Result<Hash, Error> {
     let int_input: &mut [u64; KECCAK_WORDS] = bytemuck::try_from_bytes_mut(input)
         .map_err(|_| Error)?;
 
@@ -271,7 +271,7 @@ mod tests {
 
     fn test_input(input: &mut [u8; BYTES_ARRAY_INPUT], expected_hash: Hash) {
         let mut scratch_pad = ScratchPad::default();
-        let hash = xelis_hash(input, &mut scratch_pad).unwrap();
+        let hash = naya_hash(input, &mut scratch_pad).unwrap();
         assert_eq!(hash, expected_hash);
     }
 
@@ -285,7 +285,7 @@ mod tests {
         for i in 0..ITERATIONS {
             input[0] = i as u8;
             input[1] = (i >> 8) as u8;
-            let _ = hint::black_box(xelis_hash(&mut input, &mut scratch_pad)).unwrap();
+            let _ = hint::black_box(naya_hash(&mut input, &mut scratch_pad)).unwrap();
         }
 
         let elapsed = start.elapsed();
@@ -307,10 +307,10 @@ mod tests {
     }
 
     #[test]
-    fn test_xelis_input() {
+    fn test_naya_input() {
         let mut input = [0u8; BYTES_ARRAY_INPUT];
 
-        let custom = b"xelis-hashing-algorithm";
+        let custom = b"naya-hashing-algorithm";
         input[0..custom.len()].copy_from_slice(custom);
 
         let expected_hash = [
@@ -325,7 +325,7 @@ mod tests {
         let mut scratch_pad = ScratchPad::default();
         let mut input = AlignedInput::default();
 
-        let hash = xelis_hash(input.as_mut_slice().unwrap(), &mut scratch_pad).unwrap();
+        let hash = naya_hash(input.as_mut_slice().unwrap(), &mut scratch_pad).unwrap();
         let expected_hash = [
             0x0e, 0xbb, 0xbd, 0x8a, 0x31, 0xed, 0xad, 0xfe, 0x09, 0x8f, 0x2d, 0x77, 0x0d, 0x84,
             0xb7, 0x19, 0x58, 0x86, 0x75, 0xab, 0x88, 0xa0, 0xa1, 0x70, 0x67, 0xd0, 0x0a, 0x8f,
